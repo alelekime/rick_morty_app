@@ -60,3 +60,16 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Local test artifacts
+.derivedData-tests/Logs/Test/
+.derivedData-tests/Build/Products/
+.derivedData-tests/Logs/Test/
+.derivedData-tests/Logs/Build/
+.derivedData-tests/Logs/Other/
+.derivedData-tests/Logs/Test/
+.derivedData-tests/Logs/Build/
+.derivedData-tests/Logs/Other/
+.derivedData-tests/Logs/Test/
+.derivedData-tests/Logs/Build/
+.derivedData-tests/Logs/Other/
