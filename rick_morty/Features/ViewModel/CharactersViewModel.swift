@@ -28,7 +28,7 @@ class CharactersViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            charactersResponse = try await characterService.getCharacters(page: currentPage)
+            charactersResponse = try await characterService.getCharacters(page: currentPage, name: nil, status: nil)
         } catch {
             errorMessage = error.localizedDescription
         }
