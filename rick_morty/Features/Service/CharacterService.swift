@@ -7,6 +7,11 @@
 
 import Foundation
 
+enum CharacterServiceError: Error, Equatable {
+    case invalidResponse
+    case httpStatus(Int)
+}
+
 class CharacterService: CharacterServiceProtocol {
     
     private let urlSession: URLSession
@@ -39,7 +44,7 @@ class CharacterService: CharacterServiceProtocol {
             throw URLError(.badURL)
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let data = try await fetchData(from: url)
         
         return try JSONDecoder().decode(CharacterResponse.self, from: data)
     }
@@ -49,10 +54,22 @@ class CharacterService: CharacterServiceProtocol {
             throw URLError(.badURL)
         }
         
-        let (data, _) = try await urlSession.data(from: url)
+        let data = try await fetchData(from: url)
         
         return try JSONDecoder().decode(Character.self, from: data)
     }
-    
-    
+
+    private func fetchData(from url: URL) async throws -> Data {
+        let (data, response) = try await urlSession.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CharacterServiceError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw CharacterServiceError.httpStatus(httpResponse.statusCode)
+        }
+
+        return data
+    }
 }

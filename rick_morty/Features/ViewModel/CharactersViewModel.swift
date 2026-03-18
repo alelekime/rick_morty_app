@@ -11,7 +11,7 @@ import Combine
 @MainActor
 class CharactersViewModel: ObservableObject {
     
-    private let characterService: CharacterService
+    private let characterService: CharacterServiceProtocol
     
     @Published var characters: [Character] = []
     @Published var character: Character = Character(id: 0, image: "", name: "", status: "", species: "", gender: "", origin: LocationInfo(name: "", url: ""), location: LocationInfo(name: "", url: ""), episode: [""])
@@ -25,7 +25,7 @@ class CharactersViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var status: CharacterStatus = .all
     
-    init(characterService: CharacterService) {
+    init(characterService: CharacterServiceProtocol) {
         self.characterService = characterService
     }
     
