@@ -10,8 +10,12 @@ import SwiftUI
 struct CharactersView: View {
     @StateObject var viewModel: CharactersViewModel
     var body: some View {
-        List(viewModel.characters ?? []) { character in
-            Text(character.name)
+        NavigationStack {
+            ForEach(viewModel.characters) { character in
+                NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
+                    CharacterListItem(character: character)
+                }
+            }
         }.task {
             await viewModel.getCharacters()
         }

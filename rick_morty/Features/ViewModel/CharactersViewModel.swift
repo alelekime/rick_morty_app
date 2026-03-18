@@ -14,6 +14,7 @@ class CharactersViewModel: ObservableObject {
     private let characterService: CharacterService
     
     @Published var characters: [Character] = []
+    @Published var character: Character = Character(id: 0, image: "", name: "", status: "", species: "", gender: "", origin: LocationInfo(name: "", url: ""), location: LocationInfo(name: "", url: ""), episode: [""])
     @Published var charactersResponse: CharacterResponse?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
@@ -35,5 +36,17 @@ class CharactersViewModel: ObservableObject {
         
         guard let charactersResponse else { return }
         characters = charactersResponse.results
+    }
+    
+    func getcharacter(id: Int) async {
+        isLoading = true
+        errorMessage = nil
+        do {
+            character = try await characterService.getCharacter(id: id)
+            
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
     }
 }
