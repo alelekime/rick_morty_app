@@ -13,11 +13,17 @@ struct CharactersView: View {
     
     var body: some View {
         NavigationStack {
-            content
+            VStack {
+                picker
+                content
+            }
         }
         .searchable(text: $searchContext.query, placement: .sidebar, prompt: "Search by name")
         .onChange(of: searchContext.debouncedQuery) { _, newValue in
             viewModel.updateSearchText(newValue)
+        }
+        .onChange(of: viewModel.status) { _, newValue in
+            viewModel.updateStatus(newValue.rawValue)
         }
         .task {
             await viewModel.getCharacters()
@@ -58,6 +64,16 @@ struct CharactersView: View {
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private var picker: some View {
+        Picker("Status", selection: $viewModel.status) {
+            ForEach(CharacterStatus.allCases) { status in
+                Text(status.rawValue).tag(status)
+            }
+        }
+        .pickerStyle(.segmented)
     }
 }
 
