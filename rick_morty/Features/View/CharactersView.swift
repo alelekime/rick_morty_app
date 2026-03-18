@@ -51,6 +51,8 @@ struct CharactersView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if viewModel.errorMessage != nil {
             errorView
+        } else if viewModel.characters.isEmpty {
+            emptyView
         } else {
             characterList
         }
@@ -79,6 +81,27 @@ struct CharactersView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
+
+    @ViewBuilder
+    private var emptyView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary)
+
+            Text("No characters found")
+                .font(.title3)
+                .fontWeight(.semibold)
+
+            Text(viewModel.emptyStateMessage)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()

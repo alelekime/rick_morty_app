@@ -24,6 +24,18 @@ class CharactersViewModel: ObservableObject {
     
     @Published var searchText: String = ""
     @Published var status: CharacterStatus = .all
+
+    var emptyStateMessage: String {
+        if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Try a different name or clear your search."
+        }
+
+        if status != .all {
+            return "Try another status filter to see more characters."
+        }
+
+        return "There are no characters with your filters."
+    }
     
     init(characterService: CharacterServiceProtocol) {
         self.characterService = characterService
