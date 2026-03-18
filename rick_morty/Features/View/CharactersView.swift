@@ -82,6 +82,20 @@ struct CharactersView: View {
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     .listRowBackground(Color.clear)
+                    .onAppear {
+                           Task {
+                               await viewModel.loadNextPage(currentCharacter: character)
+                           }
+                       }
+                }
+                if viewModel.isLoadingNextPage {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .padding()
+                        Spacer()
+                    }
+                    .listRowSeparator(.hidden)
                 }
             }
             .listStyle(.plain)

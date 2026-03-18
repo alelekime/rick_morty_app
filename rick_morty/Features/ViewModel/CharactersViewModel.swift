@@ -17,8 +17,10 @@ class CharactersViewModel: ObservableObject {
     @Published var character: Character = Character(id: 0, image: "", name: "", status: "", species: "", gender: "", origin: LocationInfo(name: "", url: ""), location: LocationInfo(name: "", url: ""), episode: [""])
     @Published var charactersResponse: CharacterResponse?
     @Published var isLoading: Bool = false
+    @Published var isLoadingNextPage = false
     @Published var errorMessage: String?
     @Published var currentPage: Int = 1
+    @Published var hasNextPage: Bool = true
     
     @Published var searchText: String = ""
     @Published var status: CharacterStatus = .all
@@ -28,7 +30,12 @@ class CharactersViewModel: ObservableObject {
     }
     
     func getCharacters() async {
-        isLoading = true
+        if currentPage == 1 {
+            isLoading = true
+        } else {
+            isLoadingNextPage = true
+        }
+        
         errorMessage = nil
         do {
             charactersResponse = try await characterService.getCharacters(
@@ -36,13 +43,24 @@ class CharactersViewModel: ObservableObject {
                 name: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
                 status: status.rawValue.lowercased()
             )
+            guard let charactersResponse else { return }
+            if currentPage == 1 {
+                
+                characters = charactersResponse.results
+            } else {
+                characters.append(contentsOf: charactersResponse.results)
+            }
+            
+            hasNextPage = charactersResponse.info.next != nil
         } catch {
             errorMessage = error.localizedDescription
+            
+            if currentPage > 1 {
+                currentPage -= 1
+            }
         }
         isLoading = false
-        
-        guard let charactersResponse else { return }
-        characters = charactersResponse.results
+        isLoadingNextPage = false
     }
     
     func getcharacter(id: Int) async {
@@ -57,13 +75,35 @@ class CharactersViewModel: ObservableObject {
         isLoading = false
     }
     
+    func loadNextPage(currentCharacter: Character) async {
+        guard hasNextPage else { return }
+        guard !isLoading else { return }
+        guard !isLoadingNextPage else { return }
+        guard !characters.isEmpty else { return }
+        
+        let thresholdIndex = max(characters.count - 5, 0)
+        
+        if let currentIndex = characters.firstIndex(where: { $0.id == currentCharacter.id }),
+           currentIndex >= thresholdIndex {
+            currentPage += 1
+            await getCharacters()
+        }
+    }
+    
     func updateSearchText(_ text: String) {
         searchText = text
         currentPage = 1
+        resetPagination()
         
         Task {
             await getCharacters()
         }
+    }
+    
+    private func resetPagination() {
+        currentPage = 1
+        hasNextPage = true
+        characters = []
     }
 
     func updateStatus(_ status: String) {
@@ -78,7 +118,7 @@ class CharactersViewModel: ObservableObject {
         default:
             self.status = .all
         }
-
+        resetPagination()
         currentPage = 1
         
         Task {
