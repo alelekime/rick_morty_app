@@ -73,6 +73,8 @@ class CharactersViewModel: ObservableObject {
             self.status = .alive
         case "dead":
             self.status = .dead
+        case "unknown":
+            self.status = .unknown
         default:
             self.status = .all
         }
