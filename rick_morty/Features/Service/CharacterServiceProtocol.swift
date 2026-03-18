@@ -8,6 +8,6 @@
 import Foundation
 
 protocol CharacterServiceProtocol {
-    func getCharacters(page: Int) async throws -> [CharacterResponse]
+    func getCharacters(page: Int) async throws -> CharacterResponse
     func getCharacter(id: Int) async throws -> Character
 }

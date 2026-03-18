@@ -7,14 +7,19 @@
 
 import Foundation
 
-struct Character: Identifiable, Codable {
-    let id: String
+struct Character: Identifiable, Decodable {
+    let id: Int
     let image: String
     let name: String
     let status: String
     let species: String
     let gender: String
-    let origin: [String: String]
-    let location: [String: String]
+    let origin: LocationInfo
+    let location: LocationInfo
     let episode: [String]
+}
+
+struct LocationInfo: Decodable {
+    let name: String
+    let url: String
 }

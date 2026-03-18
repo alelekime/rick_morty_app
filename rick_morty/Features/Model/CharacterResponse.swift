@@ -7,7 +7,7 @@
 
 // API Resposnse
 struct CharacterResponse: Decodable {
-    let info: [String: Int]
+    let info: CharacterResponseInfo
     let results: [Character]
 }
 
