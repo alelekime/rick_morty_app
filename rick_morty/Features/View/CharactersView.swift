@@ -9,9 +9,15 @@ import SwiftUI
 
 struct CharactersView: View {
     @StateObject var viewModel: CharactersViewModel
+    @StateObject var searchContext = SearchContext()
+    
     var body: some View {
         NavigationStack {
             content
+        }
+        .searchable(text: $searchContext.query, placement: .sidebar, prompt: "Search by name")
+        .onChange(of: searchContext.debouncedQuery) { _, newValue in
+            viewModel.updateSearchText(newValue)
         }
         .task {
             await viewModel.getCharacters()
