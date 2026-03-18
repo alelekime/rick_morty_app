@@ -17,7 +17,6 @@ struct CharactersView: View {
                 content
             }
             .navigationTitle("Rick and Morty")
-            .navigationSubtitle("Characters")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
