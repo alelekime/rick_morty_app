@@ -86,35 +86,20 @@ struct CharactersView: View {
     }
     
     @ViewBuilder
-        private var characterList: some View {
-            List {
-                ForEach(viewModel.characters) { character in
-                    NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
-                        CharacterListItem(character: character)
-                    }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    .listRowBackground(Color.clear)
-                    .onAppear {
-                           Task {
-                               await viewModel.loadNextPage(currentCharacter: character)
-                           }
-                       }
+    private var characterList: some View {
+        List {
+            ForEach(viewModel.characters) { character in
+                NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
+                    CharacterListItem(character: character)
                 }
-                if viewModel.isLoadingNextPage {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                            .padding()
-                        Spacer()
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .listRowBackground(Color.clear)
+                .onAppear {
+                    Task {
+                        await viewModel.loadNextPage(currentCharacter: character)
                     }
-                    .listRowSeparator(.hidden)
                 }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemGroupedBackground))
-        }
-        
             if viewModel.isLoadingNextPage {
                 HStack {
                     Spacer()
