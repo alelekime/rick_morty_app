@@ -10,19 +10,46 @@ import SwiftUI
 struct CharactersView: View {
     @StateObject var viewModel: CharactersViewModel
     var body: some View {
-        if viewModel.errorMessage != nil {
-            VStack {
-                Text("Error: \(viewModel.errorMessage!)")
-            }
+        NavigationStack {
+            content
+        }
+        .task {
+            await viewModel.getCharacters()
+        }
+    }
+    
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.isLoading {
+            ProgressView()
+        } else if viewModel.errorMessage != nil {
+            errorView
         } else {
-            NavigationStack {
-                ForEach(viewModel.characters) { character in
-                    NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
-                        CharacterListItem(character: character)
-                    }
+            characterList
+        }
+    }
+    
+    @ViewBuilder
+    private var errorView: some View {
+        VStack {
+            Text("Error: \(viewModel.errorMessage ?? "Unknown error")")
+                .font(.largeTitle)
+            
+            Button("Retry") {
+                Task {
+                    await viewModel.getCharacters()
                 }
-            }.task {
-                await viewModel.getCharacters()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var characterList: some View {
+        List {
+            ForEach(viewModel.characters) { character in
+                NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
+                    CharacterListItem(character: character)
+                }
             }
         }
     }
