@@ -64,6 +64,7 @@ struct CharactersView: View {
                 }
             }
         }
+        .listStyle(.grouped)
     }
     
     @ViewBuilder

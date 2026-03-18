@@ -10,28 +10,48 @@ import SwiftUI
 struct CharacterListItem: View {
     var character: Character
     var body: some View {
-        VStack {
-            Text(character.name)
-            Image("rick")
-                .resizable()
-                .scaledToFit()
+        HStack(spacing: 12) {
+            AsyncImage(url: URL(string: character.image)) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder: {
+                ProgressView()
+            }
+            .frame(width: 80, height: 80)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text(character.name)
+                    .font(.headline)
+                    .lineLimit(1)
+                
+                Text(character.species)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                
+                Text(character.status)
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .background(statusColor, in: Capsule())
+            }
+            
+            Spacer()
+        }
+        .padding(.vertical, 8)
+    }
+    
+    
+    private var statusColor: Color {
+        switch character.status.lowercased() {
+        case "alive":
+            return .green
+        case "dead":
+            return .red
+        default:
+            return .gray
         }
     }
-}
-
-#Preview {
-    let character = Character(
-        id: 0,
-        image: "rick", name: "Rick Sanchez",
-        status: "Alive",
-        species: "Human",
-        gender: "Male",
-        origin: LocationInfo(name: "Earth (C-137)", url: "https://rickandmortyapi.com/api/location/1"),
-        location: LocationInfo(name: "Citadel of Ricks", url: "https://rickandmortyapi.com/api/location/3"),
-        episode: [
-            "https://rickandmortyapi.com/api/episode/1",
-            "https://rickandmortyapi.com/api/episode/2"
-        ]
-    )
-    CharacterListItem(character: character)
 }
