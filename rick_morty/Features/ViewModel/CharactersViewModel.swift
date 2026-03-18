@@ -12,6 +12,7 @@ import Combine
 class CharactersViewModel: ObservableObject {
     
     private let characterService: CharacterServiceProtocol
+    private var pendingRetryPage: Int?
     
     @Published var characters: [Character] = []
     @Published var character: Character = Character(id: 0, image: "", name: "", status: "", species: "", gender: "", origin: LocationInfo(name: "", url: ""), location: LocationInfo(name: "", url: ""), episode: [""])
@@ -24,6 +25,8 @@ class CharactersViewModel: ObservableObject {
     
     @Published var searchText: String = ""
     @Published var status: CharacterStatus = .all
+    @Published var showRateLimitAlert = false
+    @Published var rateLimitMessage = "The API rate limit was reached. Please try again."
 
     var emptyStateMessage: String {
         if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -42,6 +45,8 @@ class CharactersViewModel: ObservableObject {
     }
     
     func getCharacters() async {
+        let requestedPage = currentPage
+
         if currentPage == 1 {
             isLoading = true
         } else {
@@ -51,24 +56,35 @@ class CharactersViewModel: ObservableObject {
         errorMessage = nil
         do {
             charactersResponse = try await characterService.getCharacters(
-                page: currentPage,
+                page: requestedPage,
                 name: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
                 status: status.rawValue.lowercased()
             )
             guard let charactersResponse else { return }
-            if currentPage == 1 {
+            if requestedPage == 1 {
                 
                 characters = charactersResponse.results
             } else {
                 characters.append(contentsOf: charactersResponse.results)
             }
             
-            hasNextPage = charactersResponse.info.next != nil
+            hasNextPage = requestedPage < charactersResponse.info.pages
+            pendingRetryPage = nil
         } catch {
-            errorMessage = error.localizedDescription
-            
-            if currentPage > 1 {
-                currentPage -= 1
+            let isRateLimitError = caseMatchesRateLimit(error)
+
+            if isRateLimitError {
+                rateLimitMessage = requestedPage > 1
+                    ? "The API rate limit was reached while loading more characters."
+                    : "The API rate limit was reached while loading characters."
+                showRateLimitAlert = true
+            }
+
+            if requestedPage > 1 {
+                currentPage = requestedPage - 1
+                pendingRetryPage = isRateLimitError ? requestedPage : nil
+            } else {
+                errorMessage = isRateLimitError ? nil : error.localizedDescription
             }
         }
         isLoading = false
@@ -87,19 +103,13 @@ class CharactersViewModel: ObservableObject {
         isLoading = false
     }
     
-    func loadNextPage(currentCharacter: Character) async {
+    func loadMoreCharacters() async {
         guard hasNextPage else { return }
         guard !isLoading else { return }
         guard !isLoadingNextPage else { return }
-        guard !characters.isEmpty else { return }
         
-        let thresholdIndex = max(characters.count - 5, 0)
-        
-        if let currentIndex = characters.firstIndex(where: { $0.id == currentCharacter.id }),
-           currentIndex >= thresholdIndex {
-            currentPage += 1
-            await getCharacters()
-        }
+        currentPage += 1
+        await getCharacters()
     }
     
     func updateSearchText(_ text: String) {
@@ -111,10 +121,35 @@ class CharactersViewModel: ObservableObject {
             await getCharacters()
         }
     }
+
+    func retryRateLimitedRequest() async {
+        showRateLimitAlert = false
+        
+        if let pendingRetryPage {
+            currentPage = pendingRetryPage
+        }
+
+        await getCharacters()
+    }
+
+    func dismissRateLimitAlert() {
+        showRateLimitAlert = false
+    }
+
+    private func caseMatchesRateLimit(_ error: Error) -> Bool {
+        if case CharacterServiceError.httpStatus(429) = error {
+            return true
+        }
+
+        return false
+    }
     
     private func resetPagination() {
         currentPage = 1
         hasNextPage = true
+        charactersResponse = nil
+        pendingRetryPage = nil
+        showRateLimitAlert = false
         characters = []
     }
 
