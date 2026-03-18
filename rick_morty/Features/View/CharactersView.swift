@@ -14,12 +14,24 @@ struct CharactersView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                picker
                 content
             }
-                .navigationTitle("Rick and Morty")
-                .navigationSubtitle("Characters")
-                .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("Rick and Morty")
+            .navigationSubtitle("Characters")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("Status", selection: $viewModel.status) {
+                            ForEach(CharacterStatus.allCases) { status in
+                                Text(status.rawValue.capitalized).tag(status)
+                            }
+                        }
+                    } label: {
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                    }
+                }
+            }
         }
         .searchable(text: $searchContext.query, placement: .sidebar, prompt: "Search by name")
         .onChange(of: searchContext.debouncedQuery) { _, newValue in
@@ -103,19 +115,19 @@ struct CharactersView: View {
             .background(Color(.systemGroupedBackground))
         }
         
-        @ViewBuilder
-        private var picker: some View {
-            Picker("Status", selection: $viewModel.status) {
-                ForEach(CharacterStatus.allCases) { status in
-                    Text(status.rawValue.capitalized).tag(status)
+            if viewModel.isLoadingNextPage {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .padding()
+                    Spacer()
                 }
+                .listRowSeparator(.hidden)
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
-            .background(.regularMaterial)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+    }
 }
 
 #Preview {
