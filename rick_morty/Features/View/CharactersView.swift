@@ -39,6 +39,18 @@ struct CharactersView: View {
         .onChange(of: viewModel.status) { _, newValue in
             viewModel.updateStatus(newValue.rawValue)
         }
+        .alert("Rate limit reached", isPresented: $viewModel.showRateLimitAlert) {
+            Button("Retry") {
+                Task {
+                    await viewModel.retryRateLimitedRequest()
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.dismissRateLimitAlert()
+            }
+        } message: {
+            Text(viewModel.rateLimitMessage)
+        }
         .task {
             await viewModel.getCharacters()
         }
@@ -116,24 +128,38 @@ struct CharactersView: View {
                 }
                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 .listRowBackground(Color.clear)
-                .onAppear {
-                    Task {
-                        await viewModel.loadNextPage(currentCharacter: character)
-                    }
-                }
             }
-            if viewModel.isLoadingNextPage {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .padding()
-                    Spacer()
-                }
-                .listRowSeparator(.hidden)
+            if viewModel.hasNextPage {
+                loadMoreFooter
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+    }
+
+    private var loadMoreFooter: some View {
+        HStack {
+            Spacer()
+            Button {
+                Task {
+                    await viewModel.loadMoreCharacters()
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if viewModel.isLoadingNextPage {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                    Text(viewModel.isLoadingNextPage ? "Loading..." : "Load More")
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(viewModel.isLoadingNextPage)
+            Spacer()
+        }
+        .padding(.vertical, 12)
     }
 }
 
