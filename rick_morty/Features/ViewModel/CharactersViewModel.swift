@@ -9,9 +9,11 @@ import Foundation
 import Combine
 
 @MainActor
+/// Manages character list state, filters, and pagination.
 class CharactersViewModel: ObservableObject {
     
     private let characterService: CharacterServiceProtocol
+    // Keeps track of the page that should be retried after a rate-limit error.
     private var pendingRetryPage: Int?
     
     @Published var characters: [Character] = []
@@ -28,6 +30,7 @@ class CharactersViewModel: ObservableObject {
     @Published var showRateLimitAlert = false
     @Published var rateLimitMessage = "The API rate limit was reached. Please try again."
 
+    /// Message shown when the current filters return no results.
     var emptyStateMessage: String {
         if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return "Try a different name or clear your search."
@@ -44,6 +47,7 @@ class CharactersViewModel: ObservableObject {
         self.characterService = characterService
     }
     
+    /// Loads characters for the current page and active filters.
     func getCharacters() async {
         let requestedPage = currentPage
 
@@ -62,7 +66,6 @@ class CharactersViewModel: ObservableObject {
             )
             guard let charactersResponse else { return }
             if requestedPage == 1 {
-                
                 characters = charactersResponse.results
             } else {
                 characters.append(contentsOf: charactersResponse.results)
@@ -74,6 +77,7 @@ class CharactersViewModel: ObservableObject {
             let isRateLimitError = caseMatchesRateLimit(error)
 
             if isRateLimitError {
+                // Shows a specific alert instead of the generic error state.
                 rateLimitMessage = requestedPage > 1
                     ? "The API rate limit was reached while loading more characters."
                     : "The API rate limit was reached while loading characters."
@@ -91,6 +95,7 @@ class CharactersViewModel: ObservableObject {
         isLoadingNextPage = false
     }
     
+    /// Loads one character for the detail screen.
     func getcharacter(id: Int) async {
         isLoading = true
         errorMessage = nil
@@ -103,6 +108,7 @@ class CharactersViewModel: ObservableObject {
         isLoading = false
     }
     
+    /// Loads the next page when more results are available.
     func loadMoreCharacters() async {
         guard hasNextPage else { return }
         guard !isLoading else { return }
@@ -112,6 +118,7 @@ class CharactersViewModel: ObservableObject {
         await getCharacters()
     }
     
+    /// Applies a new search term and restarts pagination.
     func updateSearchText(_ text: String) {
         searchText = text
         currentPage = 1
@@ -122,6 +129,7 @@ class CharactersViewModel: ObservableObject {
         }
     }
 
+    /// Retries the request that failed because of rate limiting.
     func retryRateLimitedRequest() async {
         showRateLimitAlert = false
         
@@ -132,10 +140,12 @@ class CharactersViewModel: ObservableObject {
         await getCharacters()
     }
 
+    /// Closes the rate-limit alert without retrying.
     func dismissRateLimitAlert() {
         showRateLimitAlert = false
     }
 
+    // Only the 429 response is treated as a rate-limit case in the UI.
     private func caseMatchesRateLimit(_ error: Error) -> Bool {
         if case CharacterServiceError.httpStatus(429) = error {
             return true
@@ -144,6 +154,7 @@ class CharactersViewModel: ObservableObject {
         return false
     }
     
+    // Clears pagination state before running a new filtered search.
     private func resetPagination() {
         currentPage = 1
         hasNextPage = true
@@ -153,6 +164,7 @@ class CharactersViewModel: ObservableObject {
         characters = []
     }
 
+    // Converts the UI filter into the enum used by the view model.
     func updateStatus(_ status: String) {
         
         switch status {

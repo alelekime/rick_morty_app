@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// Shows the details for a selected character.
 struct CharacterDetailView: View {
     @ObservedObject var viewModel: CharactersViewModel
     var characterId: Int
@@ -26,6 +27,7 @@ struct CharacterDetailView: View {
     }
     
     @ViewBuilder
+    /// Chooses between loading, error, and detail states.
     private var content: some View {
         if viewModel.isLoading {
             ProgressView()
@@ -38,6 +40,7 @@ struct CharacterDetailView: View {
     }
     
     @ViewBuilder
+    /// Shown when loading the selected character fails.
     private var errorView: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
@@ -66,6 +69,7 @@ struct CharacterDetailView: View {
     }
     
     @ViewBuilder
+    /// Displays the selected character information.
     private var character: some View {
         VStack(spacing: 16){
             
@@ -124,6 +128,7 @@ struct CharacterDetailView: View {
         .padding()
     }
     
+    /// Returns the badge color that matches the character status.
     private var statusColor: Color {
         switch viewModel.character.status.lowercased() {
         case "alive":

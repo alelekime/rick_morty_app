@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// Shows the searchable, filterable list of characters.
 struct CharactersView: View {
     @StateObject var viewModel: CharactersViewModel
     @StateObject var searchContext = SearchContext()
@@ -57,6 +58,7 @@ struct CharactersView: View {
     }
     
     @ViewBuilder
+    // Chooses the right screen state for loading, errors, empty results, or content.
     private var content: some View {
         if viewModel.isLoading {
             ProgressView()
@@ -71,6 +73,7 @@ struct CharactersView: View {
     }
     
     @ViewBuilder
+    // Shown when the initial request fails with a non-rate-limit error.
     private var errorView: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
@@ -99,6 +102,7 @@ struct CharactersView: View {
     }
 
     @ViewBuilder
+    // Shown when the filters return no characters.
     private var emptyView: some View {
         VStack(spacing: 16) {
             Image(systemName: "magnifyingglass")
@@ -120,6 +124,7 @@ struct CharactersView: View {
     }
     
     @ViewBuilder
+    // Renders the current page of characters and the pagination footer.
     private var characterList: some View {
         List {
             ForEach(viewModel.characters) { character in
@@ -139,6 +144,7 @@ struct CharactersView: View {
         .scrollContentBackground(.hidden)
     }
 
+    // Lets the user manually load the next page.
     private var loadMoreFooter: some View {
         HStack {
             Spacer()

@@ -8,6 +8,7 @@
 import Foundation
 import OSLog
 
+/// Describes the failures returned by the character service.
 enum CharacterServiceError: Error, Equatable, LocalizedError {
     case invalidResponse
     case httpStatus(Int)
@@ -22,10 +23,12 @@ enum CharacterServiceError: Error, Equatable, LocalizedError {
     }
 }
 
+/// Fetches character data from the Rick and Morty API.
 class CharacterService: CharacterServiceProtocol {
     
     private let logger = Logger(subsystem: "rick_morty", category: "CharacterService")
     private let urlSession: URLSession
+    // Returned when the API answers with 404 for filtered searches.
     private let emptyCharacterResponse = CharacterResponse(
         info: CharacterResponseInfo(count: 0, pages: 0, next: nil, prev: nil),
         results: []
@@ -35,6 +38,7 @@ class CharacterService: CharacterServiceProtocol {
         self.urlSession = urlSession
     }
     
+    /// Fetches characters using optional page, name, and status filters.
     func getCharacters(page: Int = 1, name: String?, status: String?) async throws -> CharacterResponse {
         
         var components = URLComponents(string: "https://rickandmortyapi.com/api/character")!
@@ -59,6 +63,7 @@ class CharacterService: CharacterServiceProtocol {
             throw URLError(.badURL)
         }
 
+        // The API returns 404 when no character matches the filters.
         guard let data = try await fetchData(from: url, noFoundCharacters: true) else {
             logger.info("No characters found for \(url.absoluteString, privacy: .public)")
             return emptyCharacterResponse
@@ -69,6 +74,7 @@ class CharacterService: CharacterServiceProtocol {
         return characterResponse
     }
     
+    /// Fetches a single character by id.
     func getCharacter(id: Int) async throws -> Character {
         guard let url = URL(string: "https://rickandmortyapi.com/api/character/\(id)") else {
             throw URLError(.badURL)
@@ -83,6 +89,7 @@ class CharacterService: CharacterServiceProtocol {
         return character
     }
 
+    // Centralizes response validation and turns status codes into app errors.
     private func fetchData(from url: URL, noFoundCharacters: Bool = false) async throws -> Data? {
         logger.info("Requesting \(url.absoluteString, privacy: .public)")
 

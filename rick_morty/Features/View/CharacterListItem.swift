@@ -7,8 +7,10 @@
 
 import SwiftUI
 
+/// Displays a single character row in the list.
 struct CharacterListItem: View {
     var character: Character
+
     var body: some View {
         HStack(spacing: 12) {
             AsyncImage(url: URL(string: character.image)) { image in
@@ -44,6 +46,7 @@ struct CharacterListItem: View {
     }
     
     
+    /// Returns the badge color that matches the character status.
     private var statusColor: Color {
         switch character.status.lowercased() {
         case "alive":
