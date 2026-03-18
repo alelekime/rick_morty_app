@@ -11,7 +11,9 @@ import SwiftUI
 struct rick_mortyApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            let characterService = CharacterService()
+            let viewModel = CharactersViewModel(characterService: characterService)
+            CharactersView(viewModel: viewModel)
         }
     }
 }
