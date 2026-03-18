@@ -71,60 +71,79 @@ struct CharacterDetailView: View {
     @ViewBuilder
     /// Displays the selected character information.
     private var character: some View {
-        VStack(spacing: 16){
-            
-            AsyncImage(url: URL(string: viewModel.character.image)) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 200, height: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            
-            VStack(alignment: .center, spacing: 8) {
-                
-                Text(viewModel.character.status.capitalized)
-                    .font(.caption)
-                    .foregroundColor(.white)
-                    .padding(8)
-                    .background(statusColor, in: Capsule())
-                
-            }
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Details")
-                    .font(.headline)
-                Divider()
-                Text("Species: \(viewModel.character.species)")
-                Text("Gender: \(viewModel.character.gender)")
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Locations")
-                    .font(.headline)
-                Divider()
-                Text("Origin: \(viewModel.character.origin.name)")
-                Text("Last known location: \(viewModel.character.location.name)")
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Episodes")
-                    .font(.headline)
-                Divider()
-                ForEach(viewModel.character.episode.indices, id: \.self) { index in
-                    Text(viewModel.character.episode[index])
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+        VStack(spacing: 16) {
+            characterImage
+            statusBadge
+            detailsSection
+            locationsSection
+            episodesSection
         }
+        .padding()
+    }
+
+    /// Displays the character image at the top of the screen.
+    private var characterImage: some View {
+        AsyncImage(url: URL(string: viewModel.character.image)) { image in
+            image
+                .resizable()
+                .scaledToFill()
+        } placeholder: {
+            ProgressView()
+        }
+        .frame(width: 200, height: 200)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    /// Displays the colored status badge.
+    private var statusBadge: some View {
+        VStack(alignment: .center, spacing: 8) {
+            Text(viewModel.character.status.capitalized)
+                .font(.caption)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(statusColor, in: Capsule())
+        }
+    }
+
+    /// Displays the main character details.
+    private var detailsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Details")
+                .font(.headline)
+            Divider()
+            Text("Species: \(viewModel.character.species)")
+            Text("Gender: \(viewModel.character.gender)")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+    }
+
+    /// Displays the character origin and current location.
+    private var locationsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Locations")
+                .font(.headline)
+            Divider()
+            Text("Origin: \(viewModel.character.origin.name)")
+            Text("Last known location: \(viewModel.character.location.name)")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+    }
+
+    /// Displays the episodes where the character appears.
+    private var episodesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Episodes")
+                .font(.headline)
+            Divider()
+            ForEach(viewModel.character.episode.indices, id: \.self) { index in
+                Text(viewModel.character.episode[index])
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
     }
     
