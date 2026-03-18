@@ -134,17 +134,36 @@ struct CharacterDetailView: View {
     /// Displays the episodes where the character appears.
     private var episodesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Episodes")
-                .font(.headline)
+            HStack {
+                Text("Episodes")
+                    .font(.headline)
+                Spacer()
+                Text("\(viewModel.character.episode.count)")
+                    .font(.caption)
+                
+            }
             Divider()
             ForEach(viewModel.character.episode.indices, id: \.self) { index in
-                Text(viewModel.character.episode[index])
+                Text(formatEpisode(viewModel.character.episode[index]))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
+    }
+
+    /// Converts an episode URL into a shorter label for display.
+    private func formatEpisode(_ episodeURL: String) -> String {
+        guard
+            let url = URL(string: episodeURL),
+            let episodeId = url.pathComponents.last,
+            !episodeId.isEmpty
+        else {
+            return episodeURL
+        }
+
+        return "Episode \(episodeId)"
     }
     
     /// Returns the badge color that matches the character status.
