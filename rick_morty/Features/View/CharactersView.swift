@@ -10,14 +10,20 @@ import SwiftUI
 struct CharactersView: View {
     @StateObject var viewModel: CharactersViewModel
     var body: some View {
-        NavigationStack {
-            ForEach(viewModel.characters) { character in
-                NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
-                    CharacterListItem(character: character)
-                }
+        if viewModel.errorMessage != nil {
+            VStack {
+                Text("Error: \(viewModel.errorMessage!)")
             }
-        }.task {
-            await viewModel.getCharacters()
+        } else {
+            NavigationStack {
+                ForEach(viewModel.characters) { character in
+                    NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
+                        CharacterListItem(character: character)
+                    }
+                }
+            }.task {
+                await viewModel.getCharacters()
+            }
         }
     }
 }

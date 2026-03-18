@@ -12,30 +12,37 @@ struct CharacterDetailView: View {
     var characterId: Int
     
     var body: some View {
-        VStack {
-            Text(viewModel.character.name)
-            Image("rick")
-                .resizable()
-                .scaledToFit()
-            Text(viewModel.character.status)
-            Text(viewModel.character.species)
-            Text(viewModel.character.gender)
-            HStack {
-                Text("Origin: ")
-                Text(viewModel.character.origin.name)
-            }
-            HStack {
-                Text("Location: ")
-                Text(viewModel.character.location.name)
-            }
+        if viewModel.errorMessage != nil {
             VStack {
-                ForEach(viewModel.character.episode.indices, id: \.self) { index in
-                    Text(viewModel.character.episode[index])
-                }
+                Text("Error: \(viewModel.errorMessage!)")
             }
-        }.task {
-            await viewModel.getcharacter(id: characterId)
+        } else {
+            VStack {
+                Text(viewModel.character.name)
+                Image("rick")
+                    .resizable()
+                    .scaledToFit()
+                Text(viewModel.character.status)
+                Text(viewModel.character.species)
+                Text(viewModel.character.gender)
+                HStack {
+                    Text("Origin: ")
+                    Text(viewModel.character.origin.name)
+                }
+                HStack {
+                    Text("Location: ")
+                    Text(viewModel.character.location.name)
+                }
+                VStack {
+                    ForEach(viewModel.character.episode.indices, id: \.self) { index in
+                        Text(viewModel.character.episode[index])
+                    }
+                }
+            }.task {
+                await viewModel.getcharacter(id: characterId)
+            }
         }
+        
     }
 }
 
