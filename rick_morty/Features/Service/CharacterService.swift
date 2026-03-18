@@ -29,7 +29,7 @@ class CharacterService: CharacterServiceProtocol {
             queryItems.append(URLQueryItem(name: "name", value: name))
         }
         
-        if let status, !status.isEmpty {
+        if let status, !status.isEmpty, status != "all" {
             queryItems.append(URLQueryItem(name: "status", value: status))
         }
         
