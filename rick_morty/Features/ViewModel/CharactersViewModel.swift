@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-
+@MainActor
 class CharactersViewModel: ObservableObject {
     
     private let characterService: CharacterService
@@ -20,6 +20,9 @@ class CharactersViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var currentPage: Int = 1
     
+    @Published var searchText: String = ""
+    @Published var status: CharacterStatus = .all
+    
     init(characterService: CharacterService) {
         self.characterService = characterService
     }
@@ -28,7 +31,11 @@ class CharactersViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            charactersResponse = try await characterService.getCharacters(page: currentPage, name: nil, status: nil)
+            charactersResponse = try await characterService.getCharacters(
+                page: currentPage,
+                name: searchText.trimmingCharacters(in: .whitespacesAndNewlines),
+                status: status.rawValue.lowercased()
+            )
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -48,5 +55,32 @@ class CharactersViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+    
+    func updateSearchText(_ text: String) {
+        searchText = text
+        currentPage = 1
+        
+        Task {
+            await getCharacters()
+        }
+    }
+
+    func updateStatus(_ status: String) {
+        
+        switch status {
+        case "alive":
+            self.status = .alive
+        case "dead":
+            self.status = .dead
+        default:
+            self.status = .all
+        }
+
+        currentPage = 1
+        
+        Task {
+            await getCharacters()
+        }
     }
 }
