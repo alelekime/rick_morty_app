@@ -28,7 +28,11 @@ struct CharactersView: View {
                             }
                         }
                     } label: {
-                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                        HStack(spacing: 6) {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                        }
+                        .font(.subheadline)
+                        .fixedSize()
                     }
                 }
             }
@@ -126,22 +130,31 @@ struct CharactersView: View {
     @ViewBuilder
     // Renders the current page of characters and the pagination footer.
     private var characterList: some View {
-        List {
-            ForEach(viewModel.characters) { character in
-                NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
-                    CharacterListItem(character: character)
-                }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
+        VStack(alignment: .leading, spacing: 8) {
+            if let resultsDescriptionText {
+                Text(resultsDescriptionText)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 16)
             }
-            if viewModel.hasNextPage {
-                loadMoreFooter
-                    .listRowSeparator(.hidden)
+
+            List {
+                ForEach(viewModel.characters) { character in
+                    NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
+                        CharacterListItem(character: character)
+                    }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     .listRowBackground(Color.clear)
+                }
+                if viewModel.hasNextPage {
+                    loadMoreFooter
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
     }
 
     // Lets the user manually load the next page.
@@ -166,6 +179,30 @@ struct CharactersView: View {
             Spacer()
         }
         .padding(.vertical, 12)
+    }
+
+    private var selectedFilterLabel: String {
+        viewModel.status.rawValue.capitalized
+    }
+
+    private var resultsDescriptionText: String? {
+        let trimmedSearch = viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasSearch = !trimmedSearch.isEmpty
+        let hasFilter = viewModel.status != .all
+
+        if hasSearch && hasFilter {
+            return "Results for \"\(trimmedSearch)\" in \(selectedFilterLabel) characters"
+        }
+
+        if hasSearch {
+            return "Results for \"\(trimmedSearch)\""
+        }
+
+        if hasFilter {
+            return "Showing \(selectedFilterLabel) characters"
+        }
+
+        return nil
     }
 }
 
