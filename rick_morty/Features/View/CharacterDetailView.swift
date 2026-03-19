@@ -83,17 +83,35 @@ struct CharacterDetailView: View {
 
     /// Displays the character image at the top of the screen.
     private var characterImage: some View {
-        AsyncImage(url: URL(string: viewModel.character.image)) { image in
-            image
-                .resizable()
-                .scaledToFill()
-        } placeholder: {
-            ProgressView()
+        AsyncImage(url: URL(string: viewModel.character.image)) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+            case .empty, .failure:
+                imagePlaceholder
+            @unknown default:
+                imagePlaceholder
+            }
         }
         .frame(width: 200, height: 200)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
-
+    
+    /// Displays a placeholder while the image is loading.
+    private var imagePlaceholder: some View {
+        ZStack() {
+           ProgressView()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            Image("rick_and_morty_silhouette")
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        )
+    }
     /// Displays the colored status badge.
     private var statusBadge: some View {
         VStack(alignment: .center, spacing: 8) {
