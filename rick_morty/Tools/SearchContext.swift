@@ -12,7 +12,7 @@ class SearchContext: ObservableObject {
     
     init() {
         $query
-            .debounce(for: .seconds(0.25), scheduler: RunLoop.main)
+            .debounce(for: .seconds(0.4), scheduler: RunLoop.main)
             .assign(to: &$debouncedQuery)
     }
     
