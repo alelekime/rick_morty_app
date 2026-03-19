@@ -104,7 +104,7 @@ struct CharactersView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
-
+    
     @ViewBuilder
     // Shown when the filters return no characters.
     private var emptyView: some View {
@@ -112,11 +112,11 @@ struct CharactersView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
-
+            
             Text("No characters found")
                 .font(.title3)
                 .fontWeight(.semibold)
-
+            
             Text(viewModel.emptyStateMessage)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -131,13 +131,9 @@ struct CharactersView: View {
     // Renders the current page of characters and the pagination footer.
     private var characterList: some View {
         VStack(alignment: .leading, spacing: 8) {
-
             List {
                 if let resultsDescriptionText {
-                    Text(resultsDescriptionText)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 16)
+                    resultsSummaryRow(resultsDescriptionText)
                 }
                 
                 ForEach(viewModel.characters) { character in
@@ -145,19 +141,18 @@ struct CharactersView: View {
                         CharacterListItem(character: character)
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    .listRowBackground(Color.clear)
                 }
                 if viewModel.hasNextPage {
                     loadMoreFooter
                         .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
                 }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .listRowBackground(Color.clear)
         }
     }
-
+    
     // Lets the user manually load the next page.
     private var loadMoreFooter: some View {
         HStack {
@@ -181,28 +176,53 @@ struct CharactersView: View {
         }
         .padding(.vertical, 12)
     }
-
+    
+    private func resultsSummaryRow(_ resultsDescriptionText: String) -> some View {
+        HStack {
+            Text(resultsDescriptionText)
+                .font(.footnote)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 16)
+            
+            Spacer()
+            
+            if let hasFilter = viewModel.status != .all{
+                Button {
+                    viewModel.updateStatus("all")
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear filter summary")
+            }
+        }
+        .padding(.horizontal)
+        .listRowSeparator(.hidden)
+    }
+    
     private var selectedFilterLabel: String {
         viewModel.status.rawValue.capitalized
     }
-
+    
     private var resultsDescriptionText: String? {
         let trimmedSearch = viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let hasSearch = !trimmedSearch.isEmpty
         let hasFilter = viewModel.status != .all
-
+        
         if hasSearch && hasFilter {
             return "Results for \"\(trimmedSearch)\" in \(selectedFilterLabel) characters"
         }
-
+        
         if hasSearch {
             return "Results for \"\(trimmedSearch)\""
         }
-
+        
         if hasFilter {
             return "Showing \(selectedFilterLabel) characters"
         }
-
+        
         return nil
     }
 }
