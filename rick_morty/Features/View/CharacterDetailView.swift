@@ -126,12 +126,13 @@ struct CharacterDetailView: View {
     /// Displays the main character details.
     private var detailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Details")
+            Text("Character Overview")
                 .font(.headline)
             Divider()
-            Text("Species: \(viewModel.character.species)")
-            Text("Gender: \(viewModel.character.gender)")
+            LabeledContent("Species", value: viewModel.character.species)
+            LabeledContent("Gender", value: viewModel.character.gender)
         }
+        .font(.subheadline)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
     }
@@ -139,12 +140,13 @@ struct CharacterDetailView: View {
     /// Displays the character origin and current location.
     private var locationsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Locations")
+            Text("Places")
                 .font(.headline)
             Divider()
-            Text("Origin: \(viewModel.character.origin.name)")
-            Text("Last known location: \(viewModel.character.location.name)")
+            LabeledContent("Origin", value: viewModel.character.origin.name.capitalized)
+            LabeledContent("Last Known Location", value: viewModel.character.location.name)
         }
+        .font(.subheadline)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
     }
@@ -153,11 +155,12 @@ struct CharacterDetailView: View {
     private var episodesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Episodes")
+                Text("Episode Appearances")
                     .font(.headline)
                 Spacer()
-                Text("\(viewModel.character.episode.count)")
+                Text(episodeCountLabel)
                     .font(.caption)
+                    .foregroundColor(.secondary)
                 
             }
             Divider()
@@ -182,6 +185,12 @@ struct CharacterDetailView: View {
         }
 
         return "Episode \(episodeId)"
+    }
+
+    /// Returns a readable label for the number of episode appearances.
+    private var episodeCountLabel: String {
+        let count = viewModel.character.episode.count
+        return count == 1 ? "1 episode" : "\(count) episodes"
     }
     
     /// Returns the badge color that matches the character status.
