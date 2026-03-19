@@ -131,14 +131,15 @@ struct CharactersView: View {
     // Renders the current page of characters and the pagination footer.
     private var characterList: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let resultsDescriptionText {
-                Text(resultsDescriptionText)
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 16)
-            }
 
             List {
+                if let resultsDescriptionText {
+                    Text(resultsDescriptionText)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 16)
+                }
+                
                 ForEach(viewModel.characters) { character in
                     NavigationLink(destination: CharacterDetailView(viewModel: viewModel, characterId: character.id)) {
                         CharacterListItem(character: character)
