@@ -186,7 +186,7 @@ struct CharactersView: View {
             
             Spacer()
             
-            if let hasFilter = viewModel.status != .all{
+            if viewModel.status != .all {
                 Button {
                     viewModel.updateStatus("all")
                 } label: {
@@ -231,3 +231,4 @@ struct CharactersView: View {
     let viewModel = CharactersViewModel(characterService: CharacterService())
     CharactersView(viewModel: viewModel)
 }
+
